@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="zh-Hans"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="Kubernetes集群管理工具kubectl"><meta name="keywords" content="k8s"><meta name="author" content="Liu Hongzhen"><meta name="copyright" content="Liu Hongzhen"><title>Kubernetes集群管理工具kubectl | Liuhz's Blog</title><link rel="shortcut icon" href="/blog/melody-favicon.ico"><link rel="stylesheet" href="/blog/css/index.css?version=1.9.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.1"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  hexoVersion: '6.2.0'
+} </script><meta name="generator" content="Hexo 6.2.0"></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kubernetes%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7kubectl"><span class="toc-number">1.</span> <span class="toc-text">Kubernetes集群管理工具kubectl</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%A0%BC%E5%BC%8F"><span class="toc-number">1.2.</span> <span class="toc-text">命令格式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.</span> <span class="toc-text">常见命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#kubectl-help-%E8%8E%B7%E5%8F%96%E6%9B%B4%E5%A4%9A%E4%BF%A1%E6%81%AF"><span class="toc-number">1.3.1.</span> <span class="toc-text">kubectl help 获取更多信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.2.</span> <span class="toc-text">基础命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.3.</span> <span class="toc-text">部署命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9B%86%E7%BE%A4%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.4.</span> <span class="toc-text">集群管理命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%85%E9%9A%9C%E5%92%8C%E8%B0%83%E8%AF%95%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.5.</span> <span class="toc-text">故障和调试命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E5%AE%83%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.6.</span> <span class="toc-text">其它命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E5%89%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="toc-number">1.3.7.</span> <span class="toc-text">目前使用的命令</span></a></li></ol></li></ol></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="/blog/img/avatar.png"></div><div class="author-info__name text-center">Liu Hongzhen</div><div class="author-info__description text-center">学习 - 分享 - 收获</div><div class="follow-button"><a href="https://hongzhenliu.github.io/blog/">HEXO - 个人博客</a></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/blog/archives"><span class="pull-left">文章</span><span class="pull-right">20</span></a><a class="author-info-articles__tags article-meta" href="/blog/tags"><span class="pull-left">标签</span><span class="pull-right">8</span></a><a class="author-info-articles__categories article-meta" href="/blog/categories"><span class="pull-left">分类</span><span class="pull-right">5</span></a></div><hr><div class="author-info-links"><div class="author-info-links__title text-center">友情链接</div><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.ghpym.com/">果核剥壳</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.cupfox.com/">茶 杯 狐</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.52pojie.cn/">吾爱破解</a></div></div></div><div id="content-outer"><div class="no-bg" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/blog/">Liuhz's Blog</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/blog/">主页</a><a class="site-page" href="/blog/categories">分类</a><a class="site-page" href="/blog/tags">标签</a><a class="site-page" href="/blog/archives">归档</a><a class="site-page" href="/blog/gallery">相册</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> 搜索</span></a></span></div><div id="post-info"><div id="post-title">Kubernetes集群管理工具kubectl</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-02-01</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/blog/categories/kubenetes/">kubenetes</a></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h1 id="Kubernetes集群管理工具kubectl"><a href="#Kubernetes集群管理工具kubectl" class="headerlink" title="Kubernetes集群管理工具kubectl"></a>Kubernetes集群管理工具kubectl</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>kubectl是Kubernetes集群的命令行工具，通过kubectl能够对集群本身进行管理，并能够在集群上进行容器化应用的安装和部署</p>
+<h2 id="命令格式"><a href="#命令格式" class="headerlink" title="命令格式"></a>命令格式</h2><p>命令格式如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl [<span class="built_in">command</span>] [<span class="built_in">type</span>] [name] [flags]</span><br></pre></td></tr></table></figure>
+
+<p>参数</p>
+<ul>
+<li>command：指定要对资源执行的操作，例如create、get、describe、delete</li>
+<li>type：指定资源类型，资源类型是大小写敏感的，开发者能够以单数 、复数 和 缩略的形式</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod pod1</span><br><span class="line">kubectl get pods pod1</span><br><span class="line">kubectl get po pod1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114095544185.png"></p>
+<ul>
+<li>name：指定资源的名称，名称也是大小写敏感的，如果省略名称，则会显示所有的资源，例如</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>flags：指定可选的参数，例如，可用 -s 或者 -server参数指定Kubernetes API server的地址和端口</li>
+</ul>
+<h2 id="常见命令"><a href="#常见命令" class="headerlink" title="常见命令"></a>常见命令</h2><h3 id="kubectl-help-获取更多信息"><a href="#kubectl-help-获取更多信息" class="headerlink" title="kubectl help 获取更多信息"></a>kubectl help 获取更多信息</h3><p>通过 help命令，能够获取帮助信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取kubectl的命令</span></span><br><span class="line">kubectl --<span class="built_in">help</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取某个命令的介绍和使用</span></span><br><span class="line">kubectl get --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h3><p>常见的基础命令</p>
+<table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">create</td>
+<td align="center">通过文件名或标准输入创建资源</td>
+</tr>
+<tr>
+<td align="center">expose</td>
+<td align="center">将一个资源公开为一个新的Service</td>
+</tr>
+<tr>
+<td align="center">run</td>
+<td align="center">在集群中运行一个特定的镜像</td>
+</tr>
+<tr>
+<td align="center">set</td>
+<td align="center">在对象上设置特定的功能</td>
+</tr>
+<tr>
+<td align="center">get</td>
+<td align="center">显示一个或多个资源</td>
+</tr>
+<tr>
+<td align="center">explain</td>
+<td align="center">文档参考资料</td>
+</tr>
+<tr>
+<td align="center">edit</td>
+<td align="center">使用默认的编辑器编辑一个资源</td>
+</tr>
+<tr>
+<td align="center">delete</td>
+<td align="center">通过文件名，标准输入，资源名称或标签来删除资源</td>
+</tr>
+</tbody></table>
+<h3 id="部署命令"><a href="#部署命令" class="headerlink" title="部署命令"></a>部署命令</h3><table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">rollout</td>
+<td align="center">管理资源的发布</td>
+</tr>
+<tr>
+<td align="center">rolling-update</td>
+<td align="center">对给定的复制控制器滚动更新</td>
+</tr>
+<tr>
+<td align="center">scale</td>
+<td align="center">扩容或缩容Pod数量，Deployment、ReplicaSet、RC或Job</td>
+</tr>
+<tr>
+<td align="center">autoscale</td>
+<td align="center">创建一个自动选择扩容或缩容并设置Pod数量</td>
+</tr>
+</tbody></table>
+<h3 id="集群管理命令"><a href="#集群管理命令" class="headerlink" title="集群管理命令"></a>集群管理命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>certificate</td>
+<td>修改证书资源</td>
+</tr>
+<tr>
+<td>cluster-info</td>
+<td>显示集群信息</td>
+</tr>
+<tr>
+<td>top</td>
+<td>显示资源(CPU&#x2F;M)</td>
+</tr>
+<tr>
+<td>cordon</td>
+<td>标记节点不可调度</td>
+</tr>
+<tr>
+<td>uncordon</td>
+<td>标记节点可被调度</td>
+</tr>
+<tr>
+<td>drain</td>
+<td>驱逐节点上的应用，准备下线维护</td>
+</tr>
+<tr>
+<td>taint</td>
+<td>修改节点taint标记</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="故障和调试命令"><a href="#故障和调试命令" class="headerlink" title="故障和调试命令"></a>故障和调试命令</h3><table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">describe</td>
+<td align="center">显示特定资源或资源组的详细信息</td>
+</tr>
+<tr>
+<td align="center">logs</td>
+<td align="center">在一个Pod中打印一个容器日志，如果Pod只有一个容器，容器名称是可选的</td>
+</tr>
+<tr>
+<td align="center">attach</td>
+<td align="center">附加到一个运行的容器</td>
+</tr>
+<tr>
+<td align="center">exec</td>
+<td align="center">执行命令到容器</td>
+</tr>
+<tr>
+<td align="center">port-forward</td>
+<td align="center">转发一个或多个</td>
+</tr>
+<tr>
+<td align="center">proxy</td>
+<td align="center">运行一个proxy到Kubernetes API Server</td>
+</tr>
+<tr>
+<td align="center">cp</td>
+<td align="center">拷贝文件或目录到容器中</td>
+</tr>
+<tr>
+<td align="center">auth</td>
+<td align="center">检查授权</td>
+</tr>
+</tbody></table>
+<h3 id="其它命令"><a href="#其它命令" class="headerlink" title="其它命令"></a>其它命令</h3><table>
+<thead>
+<tr>
+<th align="center">命令</th>
+<th align="center">介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">apply</td>
+<td align="center">通过文件名或标准输入对资源应用配置</td>
+</tr>
+<tr>
+<td align="center">patch</td>
+<td align="center">使用补丁修改、更新资源的字段</td>
+</tr>
+<tr>
+<td align="center">replace</td>
+<td align="center">通过文件名或标准输入替换一个资源</td>
+</tr>
+<tr>
+<td align="center">convert</td>
+<td align="center">不同的API版本之间转换配置文件</td>
+</tr>
+<tr>
+<td align="center">label</td>
+<td align="center">更新资源上的标签</td>
+</tr>
+<tr>
+<td align="center">annotate</td>
+<td align="center">更新资源上的注释</td>
+</tr>
+<tr>
+<td align="center">completion</td>
+<td align="center">用于实现kubectl工具自动补全</td>
+</tr>
+<tr>
+<td align="center">api-versions</td>
+<td align="center">打印受支持的API版本</td>
+</tr>
+<tr>
+<td align="center">config</td>
+<td align="center">修改kubeconfig文件（用于访问API，比如配置认证信息）</td>
+</tr>
+<tr>
+<td align="center">help</td>
+<td align="center">所有命令帮助</td>
+</tr>
+<tr>
+<td align="center">plugin</td>
+<td align="center">运行一个命令行插件</td>
+</tr>
+<tr>
+<td align="center">version</td>
+<td align="center">打印客户端和服务版本信息</td>
+</tr>
+</tbody></table>
+<h3 id="目前使用的命令"><a href="#目前使用的命令" class="headerlink" title="目前使用的命令"></a>目前使用的命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个nginx镜像</span></span><br><span class="line">kubectl create deployment nginx --image=nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对外暴露端口</span></span><br><span class="line">kubectl expose deployment nginx --port=80 --<span class="built_in">type</span>=NodePort</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看资源</span></span><br><span class="line">kubectl get pod, svc</span><br></pre></td></tr></table></figure></div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Liu Hongzhen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/1/">https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hongzhenliu.github.io/blog">Liuhz's Blog</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/k8s/">k8s</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/02/01/kubenetes/2/"><i class="fa fa-chevron-left">  </i><span>快速了解 Kubernetes</span></a></div><div class="next-post pull-right"><a href="/blog/2021/02/01/kubenetes/0/"><span>Kubernetes简介</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2022 By Liu Hongzhen</div><div class="framework-info"><span>驱动 - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/lib/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/blog/js/utils.js?version=1.9.1"></script><script src="/blog/js/fancybox.js?version=1.9.1"></script><script src="/blog/js/sidebar.js?version=1.9.1"></script><script src="/blog/js/copy.js?version=1.9.1"></script><script src="/blog/js/fireworks.js?version=1.9.1"></script><script src="/blog/js/transition.js?version=1.9.1"></script><script src="/blog/js/scroll.js?version=1.9.1"></script><script src="/blog/js/head.js?version=1.9.1"></script><script src="/blog/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

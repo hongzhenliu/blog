@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-Hans"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="Kubernetes控制器Controller详解"><meta name="keywords" content="k8s"><meta name="author" content="Liu Hongzhen"><meta name="copyright" content="Liu Hongzhen"><title>Kubernetes控制器Controller详解 | Liuhz's Blog</title><link rel="shortcut icon" href="/blog/melody-favicon.ico"><link rel="stylesheet" href="/blog/css/index.css?version=1.9.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.1"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  hexoVersion: '6.2.0'
+} </script><meta name="generator" content="Hexo 6.2.0"></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kubernetes%E6%8E%A7%E5%88%B6%E5%99%A8Controller%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">Kubernetes控制器Controller详解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Statefulset"><span class="toc-number">1.1.</span> <span class="toc-text">Statefulset</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E7%8A%B6%E6%80%81%E5%BA%94%E7%94%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">无状态应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89%E7%8A%B6%E6%80%81%E5%BA%94%E7%94%A8"><span class="toc-number">1.1.2.</span> <span class="toc-text">有状态应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2%E6%9C%89%E7%8A%B6%E6%80%81%E5%BA%94%E7%94%A8"><span class="toc-number">1.1.3.</span> <span class="toc-text">部署有状态应用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DaemonSet"><span class="toc-number">1.2.</span> <span class="toc-text">DaemonSet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Job%E5%92%8CCronJob"><span class="toc-number">1.3.</span> <span class="toc-text">Job和CronJob</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Job"><span class="toc-number">1.3.1.</span> <span class="toc-text">Job</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CronJob"><span class="toc-number">1.3.2.</span> <span class="toc-text">CronJob</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A0%E9%99%A4svc-%E5%92%8C-statefulset"><span class="toc-number">1.4.</span> <span class="toc-text">删除svc 和 statefulset</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Replication-Controller"><span class="toc-number">1.5.</span> <span class="toc-text">Replication Controller</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Replica-Set"><span class="toc-number">1.5.1.</span> <span class="toc-text">Replica Set</span></a></li></ol></li></ol></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="/blog/img/avatar.png"></div><div class="author-info__name text-center">Liu Hongzhen</div><div class="author-info__description text-center">学习 - 分享 - 收获</div><div class="follow-button"><a href="https://hongzhenliu.github.io/blog/">HEXO - 个人博客</a></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/blog/archives"><span class="pull-left">文章</span><span class="pull-right">20</span></a><a class="author-info-articles__tags article-meta" href="/blog/tags"><span class="pull-left">标签</span><span class="pull-right">8</span></a><a class="author-info-articles__categories article-meta" href="/blog/categories"><span class="pull-left">分类</span><span class="pull-right">5</span></a></div><hr><div class="author-info-links"><div class="author-info-links__title text-center">友情链接</div><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.ghpym.com/">果核剥壳</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.cupfox.com/">茶 杯 狐</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.52pojie.cn/">吾爱破解</a></div></div></div><div id="content-outer"><div class="no-bg" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/blog/">Liuhz's Blog</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/blog/">主页</a><a class="site-page" href="/blog/categories">分类</a><a class="site-page" href="/blog/tags">标签</a><a class="site-page" href="/blog/archives">归档</a><a class="site-page" href="/blog/gallery">相册</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> 搜索</span></a></span></div><div id="post-info"><div id="post-title">Kubernetes控制器Controller详解</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-02-01</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/blog/categories/kubenetes/">kubenetes</a></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h1 id="Kubernetes控制器Controller详解"><a href="#Kubernetes控制器Controller详解" class="headerlink" title="Kubernetes控制器Controller详解"></a>Kubernetes控制器Controller详解</h1><h2 id="Statefulset"><a href="#Statefulset" class="headerlink" title="Statefulset"></a>Statefulset</h2><p>Statefulset主要是用来部署有状态应用</p>
+<p>对于StatefulSet中的Pod，每个Pod挂载自己独立的存储，如果一个Pod出现故障，从其他节点启动一个同样名字的Pod，要挂载上原来Pod的存储继续以它的状态提供服务。</p>
+<h3 id="无状态应用"><a href="#无状态应用" class="headerlink" title="无状态应用"></a>无状态应用</h3><p>我们原来使用 deployment，部署的都是无状态的应用，那什么是无状态应用？</p>
+<ul>
+<li>认为Pod都是一样的</li>
+<li>没有顺序要求</li>
+<li>不考虑应用在哪个node上运行</li>
+<li>能够进行随意伸缩和扩展</li>
+</ul>
+<h3 id="有状态应用"><a href="#有状态应用" class="headerlink" title="有状态应用"></a>有状态应用</h3><p>上述的因素都需要考虑到</p>
+<ul>
+<li>让每个Pod独立的</li>
+<li>让每个Pod独立的，保持Pod启动顺序和唯一性</li>
+<li>唯一的网络标识符，持久存储</li>
+<li>有序，比如mysql中的主从</li>
+</ul>
+<p>适合StatefulSet的业务包括数据库服务MySQL 和 PostgreSQL，集群化管理服务Zookeeper、etcd等有状态服务</p>
+<p>StatefulSet的另一种典型应用场景是作为一种比普通容器更稳定可靠的模拟虚拟机的机制。传统的虚拟机正是一种有状态的宠物，运维人员需要不断地维护它，容器刚开始流行时，我们用容器来模拟虚拟机使用，所有状态都保存在容器里，而这已被证明是非常不安全、不可靠的。</p>
+<p>使用StatefulSet，Pod仍然可以通过漂移到不同节点提供高可用，而存储也可以通过外挂的存储来提供<br>高可靠性，StatefulSet做的只是将确定的Pod与确定的存储关联起来保证状态的连续性。</p>
+<h3 id="部署有状态应用"><a href="#部署有状态应用" class="headerlink" title="部署有状态应用"></a>部署有状态应用</h3><p>无头service， ClusterIp：none</p>
+<p>这里就需要使用 StatefulSet部署有状态应用</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117202950336.png"></p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117203130867.png"></p>
+<p>然后通过查看pod，能否发现每个pod都有唯一的名称</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117203217016.png"></p>
+<p>然后我们在查看service，发现是无头的service</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117203245641.png"></p>
+<p>这里有状态的约定，肯定不是简简单单通过名称来进行约定，而是更加复杂的操作</p>
+<ul>
+<li>deployment：是有身份的，有唯一标识</li>
+<li>statefulset：根据主机名 + 按照一定规则生成域名</li>
+</ul>
+<p>每个pod有唯一的主机名，并且有唯一的域名</p>
+<ul>
+<li>格式：主机名称.service名称.名称空间.svc.cluster.local</li>
+<li>举例：nginx-statefulset-0.default.svc.cluster.local</li>
+</ul>
+<h2 id="DaemonSet"><a href="#DaemonSet" class="headerlink" title="DaemonSet"></a>DaemonSet</h2><p>DaemonSet 即后台支撑型服务，主要是用来部署守护进程</p>
+<p>长期伺服型和批处理型的核心在业务应用，可能有些节点运行多个同类业务的Pod，有些节点上又没有这类的Pod运行；而后台支撑型服务的核心关注点在K8S集群中的节点(物理机或虚拟机)，要保证每个节点上都有一个此类Pod运行。节点可能是所有集群节点，也可能是通过 nodeSelector选定的一些特定节点。典型的后台支撑型服务包括：存储、日志和监控等。在每个节点上支撑K8S集群运行的服务。</p>
+<p>守护进程在我们每个节点上，运行的是同一个pod，新加入的节点也同样运行在同一个pod里面</p>
+<ul>
+<li>例子：在每个node节点安装数据采集工具</li>
+</ul>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117204430836.png"></p>
+<p>这里是不是一个FileBeat镜像，主要是为了做日志采集工作</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117204810350.png"></p>
+<p>进入某个 Pod里面，进入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">exec</span> -it ds-test-cbk6v bash</span><br></pre></td></tr></table></figure>
+
+<p>通过该命令后，我们就能看到我们内部收集的日志信息了</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117204912838.png"></p>
+<h2 id="Job和CronJob"><a href="#Job和CronJob" class="headerlink" title="Job和CronJob"></a>Job和CronJob</h2><p>一次性任务 和 定时任务</p>
+<ul>
+<li>一次性任务：一次性执行完就结束</li>
+<li>定时任务：周期性执行</li>
+</ul>
+<p>Job是K8S中用来控制批处理型任务的API对象。批处理业务与长期伺服业务的主要区别就是批处理业务的运行有头有尾，而长期伺服业务在用户不停止的情况下永远运行。Job管理的Pod根据用户的设置把任务成功完成就自动退出了。成功完成的标志根据不同的 spec.completions 策略而不同：单Pod型任务有一个Pod成功就标志完成；定数成功行任务保证有N个任务全部成功；工作队列性任务根据应用确定的全局成功而标志成功。</p>
+<h3 id="Job"><a href="#Job" class="headerlink" title="Job"></a>Job</h3><p>Job也即一次性任务</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117205635945.png"></p>
+<p>使用下面命令，能够看到目前已经存在的Job</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get <span class="built_in">jobs</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117205948374.png"></p>
+<p>在计算完成后，通过命令查看，能够发现该任务已经完成</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210031725.png"></p>
+<p>我们可以通过查看日志，查看到一次性任务的结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl logs pi-qpqff</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210110343.png"></p>
+<h3 id="CronJob"><a href="#CronJob" class="headerlink" title="CronJob"></a>CronJob</h3><p>定时任务，cronjob.yaml如下所示</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210309069.png"></p>
+<p>这里面的命令就是每个一段时间，这里是通过 cron 表达式配置的，通过 schedule字段</p>
+<p>然后下面命令就是每个一段时间输出 </p>
+<p>我们首先用上述的配置文件，创建一个定时任务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f cronjob.yaml</span><br></pre></td></tr></table></figure>
+
+<p>创建完成后，我们就可以通过下面命令查看定时任务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get cronjobs</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210611783.png"></p>
+<p>我们可以通过日志进行查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl logs hello-1599100140-wkn79</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210722556.png"></p>
+<p>然后每次执行，就会多出一个 pod</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201117210751068.png"></p>
+<h2 id="删除svc-和-statefulset"><a href="#删除svc-和-statefulset" class="headerlink" title="删除svc 和 statefulset"></a>删除svc 和 statefulset</h2><p>使用下面命令，可以删除我们添加的svc 和 statefulset</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete svc web</span><br><span class="line"></span><br><span class="line">kubectl delete statefulset --all</span><br></pre></td></tr></table></figure>
+
+<h2 id="Replication-Controller"><a href="#Replication-Controller" class="headerlink" title="Replication Controller"></a>Replication Controller</h2><p>Replication Controller 简称 <strong>RC</strong>，是K8S中的复制控制器。RC是K8S集群中最早的保证Pod高可用的API对象。通过监控运行中的Pod来保证集群中运行指定数目的Pod副本。指定的数目可以是多个也可以是1个；少于指定数目，RC就会启动新的Pod副本；多于指定数目，RC就会杀死多余的Pod副本。</p>
+<p>即使在指定数目为1的情况下，通过RC运行Pod也比直接运行Pod更明智，因为RC也可以发挥它高可用的能力，保证永远有一个Pod在运行。RC是K8S中较早期的技术概念，只适用于长期伺服型的业务类型，比如控制Pod提供高可用的Web服务。</p>
+<h3 id="Replica-Set"><a href="#Replica-Set" class="headerlink" title="Replica Set"></a>Replica Set</h3><p>Replica Set 检查 RS，也就是副本集。RS是新一代的RC，提供同样高可用能力，区别主要在于RS后来居上，能够支持更多种类的匹配模式。副本集对象一般不单独使用，而是作为Deployment的理想状态参数来使用</p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Liu Hongzhen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/10/">https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/10/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hongzhenliu.github.io/blog">Liuhz's Blog</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/k8s/">k8s</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/02/01/kubenetes/11/"><i class="fa fa-chevron-left">  </i><span>Kubernetes配置管理</span></a></div><div class="next-post pull-right"><a href="/blog/2021/02/01/kubenetes/9/"><span>Kubernetes核心技术Service</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2022 By Liu Hongzhen</div><div class="framework-info"><span>驱动 - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/lib/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/blog/js/utils.js?version=1.9.1"></script><script src="/blog/js/fancybox.js?version=1.9.1"></script><script src="/blog/js/sidebar.js?version=1.9.1"></script><script src="/blog/js/copy.js?version=1.9.1"></script><script src="/blog/js/fireworks.js?version=1.9.1"></script><script src="/blog/js/transition.js?version=1.9.1"></script><script src="/blog/js/scroll.js?version=1.9.1"></script><script src="/blog/js/head.js?version=1.9.1"></script><script src="/blog/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

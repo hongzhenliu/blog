@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="zh-Hans"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="Kubernetes集群资源监控"><meta name="keywords" content="k8s"><meta name="author" content="Liu Hongzhen"><meta name="copyright" content="Liu Hongzhen"><title>Kubernetes集群资源监控 | Liuhz's Blog</title><link rel="shortcut icon" href="/blog/melody-favicon.ico"><link rel="stylesheet" href="/blog/css/index.css?version=1.9.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.1"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  hexoVersion: '6.2.0'
+} </script><meta name="generator" content="Hexo 6.2.0"></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kubernetes%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E7%9B%91%E6%8E%A7"><span class="toc-number">1.</span> <span class="toc-text">Kubernetes集群资源监控</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E6%8C%87%E6%A0%87"><span class="toc-number">1.1.1.</span> <span class="toc-text">监控指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E5%B9%B3%E5%8F%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">监控平台</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%83%A8%E7%BD%B2prometheus"><span class="toc-number">1.2.</span> <span class="toc-text">部署prometheus</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="toc-number">1.2.1.</span> <span class="toc-text">配置数据源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%BE%E7%BD%AE%E6%98%BE%E7%A4%BA%E6%95%B0%E6%8D%AE%E7%9A%84%E6%A8%A1%E6%9D%BF"><span class="toc-number">1.2.2.</span> <span class="toc-text">设置显示数据的模板</span></a></li></ol></li></ol></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="/blog/img/avatar.png"></div><div class="author-info__name text-center">Liu Hongzhen</div><div class="author-info__description text-center">学习 - 分享 - 收获</div><div class="follow-button"><a href="https://hongzhenliu.github.io/blog/">HEXO - 个人博客</a></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/blog/archives"><span class="pull-left">文章</span><span class="pull-right">20</span></a><a class="author-info-articles__tags article-meta" href="/blog/tags"><span class="pull-left">标签</span><span class="pull-right">8</span></a><a class="author-info-articles__categories article-meta" href="/blog/categories"><span class="pull-left">分类</span><span class="pull-right">5</span></a></div><hr><div class="author-info-links"><div class="author-info-links__title text-center">友情链接</div><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.ghpym.com/">果核剥壳</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.cupfox.com/">茶 杯 狐</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.52pojie.cn/">吾爱破解</a></div></div></div><div id="content-outer"><div class="no-bg" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/blog/">Liuhz's Blog</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/blog/">主页</a><a class="site-page" href="/blog/categories">分类</a><a class="site-page" href="/blog/tags">标签</a><a class="site-page" href="/blog/archives">归档</a><a class="site-page" href="/blog/gallery">相册</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> 搜索</span></a></span></div><div id="post-info"><div id="post-title">Kubernetes集群资源监控</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-02-01</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/blog/categories/kubenetes/">kubenetes</a></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h1 id="Kubernetes集群资源监控"><a href="#Kubernetes集群资源监控" class="headerlink" title="Kubernetes集群资源监控"></a>Kubernetes集群资源监控</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><h3 id="监控指标"><a href="#监控指标" class="headerlink" title="监控指标"></a>监控指标</h3><p>一个好的系统，主要监控以下内容</p>
+<ul>
+<li>集群监控<ul>
+<li>节点资源利用率</li>
+<li>节点数</li>
+<li>运行Pods</li>
+</ul>
+</li>
+<li>Pod监控<ul>
+<li>容器指标</li>
+<li>应用程序【程序占用多少CPU、内存】</li>
+</ul>
+</li>
+</ul>
+<h3 id="监控平台"><a href="#监控平台" class="headerlink" title="监控平台"></a>监控平台</h3><p>使用普罗米修斯【prometheus】 + Grafana 搭建监控平台</p>
+<ul>
+<li><p>prometheus【定时搜索被监控服务的状态】</p>
+<ul>
+<li>开源的</li>
+<li>监控、报警、数据库</li>
+<li>以HTTP协议周期性抓取被监控组件状态</li>
+<li>不需要复杂的集成过程，使用http接口接入即可</li>
+</ul>
+</li>
+<li><p>Grafana</p>
+<ul>
+<li>开源的数据分析和可视化工具</li>
+<li>支持多种数据源</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120082257441.png"></p>
+<h2 id="部署prometheus"><a href="#部署prometheus" class="headerlink" title="部署prometheus"></a>部署prometheus</h2><p>首先需要部署一个守护进程</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120083606298.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: DaemonSet</span><br><span class="line">metadata:</span><br><span class="line">  name: node-exporter</span><br><span class="line">  namespace: kube-system</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: node-exporter</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      k8s-app: node-exporter</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        k8s-app: node-exporter</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - image: prom/node-exporter</span><br><span class="line">        name: node-exporter</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 9100</span><br><span class="line">          protocol: TCP</span><br><span class="line">          name: http</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: node-exporter</span><br><span class="line">  name: node-exporter</span><br><span class="line">  namespace: kube-system</span><br><span class="line">spec:</span><br><span class="line">  ports:</span><br><span class="line">  - name: http</span><br><span class="line">    port: 9100</span><br><span class="line">    nodePort: 31672</span><br><span class="line">    protocol: TCP</span><br><span class="line">  <span class="built_in">type</span>: NodePort</span><br><span class="line">  selector:</span><br><span class="line">    k8s-app: node-exporter</span><br></pre></td></tr></table></figure>
+
+<p>然后执行下面命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f node-exporter.yaml</span><br></pre></td></tr></table></figure>
+
+<p>执行完，发现会报错</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120084034160.png"></p>
+<p>这是因为版本不一致的问题，因为发布的正式版本，而这个属于测试版本</p>
+<p>所以我们找到第一行，然后把内容修改为如下所示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改前</span></span><br><span class="line">apiVersion: extensions/v1beta1</span><br><span class="line"><span class="comment"># 修改后 【正式版本发布后，测试版本不能使用】</span></span><br><span class="line">apiVersion: apps/v1</span><br></pre></td></tr></table></figure>
+
+<p>创建完成后的效果</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120085721454.png"></p>
+<p>然后通过yaml的方式部署prometheus</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120083107594.png"></p>
+<ul>
+<li>configmap：定义一个configmap：存储一些配置文件【不加密】</li>
+<li>prometheus.deploy.yaml：部署一个deployment【包括端口号，资源限制】</li>
+<li>prometheus.svc.yaml：对外暴露的端口</li>
+<li>rbac-setup.yaml：分配一些角色的权限</li>
+</ul>
+<p>下面我们进入目录下，首先部署 rbac-setup.yaml</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f rbac-setup.yaml</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120090002150.png"></p>
+<p>然后分别部署</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 部署configmap</span></span><br><span class="line">kubectl create -f configmap.yaml</span><br><span class="line"><span class="comment"># 部署deployment</span></span><br><span class="line">kubectl create -f prometheus.deploy.yml</span><br><span class="line"><span class="comment"># 部署svc</span></span><br><span class="line">kubectl create -f prometheus.svc.yml</span><br></pre></td></tr></table></figure>
+
+<p>部署完成后，我们使用下面命令查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120093213576.png"></p>
+<p>在我们部署完成后，即可看到 prometheus 的 pod了，然后通过下面命令，能够看到对应的端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121091348752.png"></p>
+<p>通过这个，我们可以看到 <code>prometheus</code> 对外暴露的端口为 30003，访问页面即可对应的图形化界面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.177.130:30003</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121091508851.png"></p>
+<p>在上面我们部署完prometheus后，我们还需要来部署grafana</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create -f grafana-deploy.yaml</span><br></pre></td></tr></table></figure>
+
+<p>然后执行完后，发现下面的问题</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error: unable to recognize <span class="string">&quot;grafana-deploy.yaml&quot;</span>: no matches <span class="keyword">for</span> kind <span class="string">&quot;Deployment&quot;</span> <span class="keyword">in</span> version <span class="string">&quot;extensions/v1beta1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们需要修改如下内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修改</span></span><br><span class="line">apiVersion: apps/v1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加selector</span></span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      app: grafana</span><br><span class="line">      component: core</span><br></pre></td></tr></table></figure>
+
+<p>修改完成后，我们继续执行上述代码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建deployment</span></span><br><span class="line">kubectl create -f grafana-deploy.yaml</span><br><span class="line"><span class="comment"># 创建svc</span></span><br><span class="line">kubectl create -f grafana-svc.yaml</span><br><span class="line"><span class="comment"># 创建 ing</span></span><br><span class="line">kubectl create -f grafana-ing.yaml</span><br></pre></td></tr></table></figure>
+
+<p>我们能看到，我们的grafana正在</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120110426534.png"></p>
+<h3 id="配置数据源"><a href="#配置数据源" class="headerlink" title="配置数据源"></a>配置数据源</h3><p>下面我们需要开始打开 Grafana，然后配置数据源，导入数据显示模板</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get svc -n kube-system</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120111949197.png"></p>
+<p>我们可以通过 ip + 30431 访问我们的 grafana 图形化页面</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201120112048887.png"></p>
+<p>然后输入账号和密码：admin admin</p>
+<p>进入后，我们就需要配置 prometheus 的数据源</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092012018.png"></p>
+<p> 和 对应的IP【这里IP是我们的ClusterIP】</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092053215.png"></p>
+<h3 id="设置显示数据的模板"><a href="#设置显示数据的模板" class="headerlink" title="设置显示数据的模板"></a>设置显示数据的模板</h3><p>选择Dashboard，导入我们的模板</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092312118.png"></p>
+<p>然后输入 315 号模板</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092418180.png"></p>
+<p>然后选择 prometheus数据源 mydb，导入即可</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092443266.png"></p>
+<p>导入后的效果如下所示</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201121092610154.png"></p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Liu Hongzhen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/16/">https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/16/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hongzhenliu.github.io/blog">Liuhz's Blog</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/k8s/">k8s</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/02/01/kubenetes/17/"><i class="fa fa-chevron-left">  </i><span>Kubernetes搭建高可用集群</span></a></div><div class="next-post pull-right"><a href="/blog/2021/02/01/kubenetes/15/"><span>Kubernetes持久化存储</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2022 By Liu Hongzhen</div><div class="framework-info"><span>驱动 - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/lib/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/blog/js/utils.js?version=1.9.1"></script><script src="/blog/js/fancybox.js?version=1.9.1"></script><script src="/blog/js/sidebar.js?version=1.9.1"></script><script src="/blog/js/copy.js?version=1.9.1"></script><script src="/blog/js/fireworks.js?version=1.9.1"></script><script src="/blog/js/transition.js?version=1.9.1"></script><script src="/blog/js/scroll.js?version=1.9.1"></script><script src="/blog/js/head.js?version=1.9.1"></script><script src="/blog/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

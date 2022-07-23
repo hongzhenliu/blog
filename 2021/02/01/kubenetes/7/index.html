@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-Hans"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta name="description" content="Kubernetes核心技术Pod"><meta name="keywords" content="k8s"><meta name="author" content="Liu Hongzhen"><meta name="copyright" content="Liu Hongzhen"><title>Kubernetes核心技术Pod | Liuhz's Blog</title><link rel="shortcut icon" href="/blog/melody-favicon.ico"><link rel="stylesheet" href="/blog/css/index.css?version=1.9.1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css?version=1.9.1"><meta name="format-detection" content="telephone=no"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script>var GLOBAL_CONFIG = { 
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  hexoVersion: '6.2.0'
+} </script><meta name="generator" content="Hexo 6.2.0"></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div id="sidebar" data-display="true"><div class="toggle-sidebar-info text-center"><span data-toggle="切换文章详情">切换站点概览</span><hr></div><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kubernetes%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AFPod"><span class="toc-number">1.</span> <span class="toc-text">Kubernetes核心技术Pod</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">Pod概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Pod%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.1.1.</span> <span class="toc-text">Pod基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Pod%E5%AD%98%E5%9C%A8%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">Pod存在的意义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">1.2.</span> <span class="toc-text">Pod实现机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E7%BD%91%E7%BB%9C"><span class="toc-number">1.2.1.</span> <span class="toc-text">共享网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%AD%98%E5%82%A8"><span class="toc-number">1.2.2.</span> <span class="toc-text">共享存储</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E7%AD%96%E7%95%A5"><span class="toc-number">1.3.</span> <span class="toc-text">Pod镜像拉取策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6"><span class="toc-number">1.4.</span> <span class="toc-text">Pod资源限制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.4.1.</span> <span class="toc-text">示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E9%87%8D%E5%90%AF%E6%9C%BA%E5%88%B6"><span class="toc-number">1.5.</span> <span class="toc-text">Pod重启机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5"><span class="toc-number">1.6.</span> <span class="toc-text">Pod健康检查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Pod%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5"><span class="toc-number">1.7.</span> <span class="toc-text">Pod调度策略</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAPod%E6%B5%81%E7%A8%8B"><span class="toc-number">1.7.1.</span> <span class="toc-text">创建Pod流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%B1%E5%93%8DPod%E8%B0%83%E5%BA%A6%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="toc-number">1.7.2.</span> <span class="toc-text">影响Pod调度的属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AErequest%E6%89%BE%E5%88%B0%E8%B6%B3%E5%A4%9Fnode%E8%8A%82%E7%82%B9%E8%BF%9B%E8%A1%8C%E8%B0%83%E5%BA%A6"><span class="toc-number">1.7.2.1.</span> <span class="toc-text">根据request找到足够node节点进行调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8A%82%E7%82%B9%E9%80%89%E6%8B%A9%E5%99%A8%E6%A0%87%E7%AD%BE%E5%BD%B1%E5%93%8DPod%E8%B0%83%E5%BA%A6"><span class="toc-number">1.7.2.2.</span> <span class="toc-text">节点选择器标签影响Pod调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8A%82%E7%82%B9%E4%BA%B2%E5%92%8C%E6%80%A7"><span class="toc-number">1.7.2.3.</span> <span class="toc-text">节点亲和性</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B1%A1%E7%82%B9%E5%92%8C%E6%B1%A1%E7%82%B9%E5%AE%B9%E5%BF%8D"><span class="toc-number">1.8.</span> <span class="toc-text">污点和污点容忍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.8.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%BA%E6%99%AF"><span class="toc-number">1.8.2.</span> <span class="toc-text">场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%B1%A1%E7%82%B9%E6%83%85%E5%86%B5"><span class="toc-number">1.8.3.</span> <span class="toc-text">查看污点情况</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AA%E8%8A%82%E7%82%B9%E6%B7%BB%E5%8A%A0%E6%B1%A1%E7%82%B9"><span class="toc-number">1.8.4.</span> <span class="toc-text">未节点添加污点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E6%B1%A1%E7%82%B9"><span class="toc-number">1.8.5.</span> <span class="toc-text">删除污点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%94%E7%A4%BA"><span class="toc-number">1.8.6.</span> <span class="toc-text">演示</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B1%A1%E7%82%B9%E5%AE%B9%E5%BF%8D"><span class="toc-number">1.8.7.</span> <span class="toc-text">污点容忍</span></a></li></ol></li></ol></li></ol></div></div><div class="author-info hide"><div class="author-info__avatar text-center"><img src="/blog/img/avatar.png"></div><div class="author-info__name text-center">Liu Hongzhen</div><div class="author-info__description text-center">学习 - 分享 - 收获</div><div class="follow-button"><a href="https://hongzhenliu.github.io/blog/">HEXO - 个人博客</a></div><hr><div class="author-info-articles"><a class="author-info-articles__archives article-meta" href="/blog/archives"><span class="pull-left">文章</span><span class="pull-right">20</span></a><a class="author-info-articles__tags article-meta" href="/blog/tags"><span class="pull-left">标签</span><span class="pull-right">8</span></a><a class="author-info-articles__categories article-meta" href="/blog/categories"><span class="pull-left">分类</span><span class="pull-right">5</span></a></div><hr><div class="author-info-links"><div class="author-info-links__title text-center">友情链接</div><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.ghpym.com/">果核剥壳</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.cupfox.com/">茶 杯 狐</a><a class="author-info-links__name text-center" target="_blank" rel="noopener" href="https://www.52pojie.cn/">吾爱破解</a></div></div></div><div id="content-outer"><div class="no-bg" id="top-container"><div id="page-header"><span class="pull-left"> <a id="site-name" href="/blog/">Liuhz's Blog</a></span><i class="fa fa-bars toggle-menu pull-right" aria-hidden="true"></i><span class="pull-right menus">   <a class="site-page" href="/blog/">主页</a><a class="site-page" href="/blog/categories">分类</a><a class="site-page" href="/blog/tags">标签</a><a class="site-page" href="/blog/archives">归档</a><a class="site-page" href="/blog/gallery">相册</a></span><span class="pull-right"><a class="site-page social-icon search"><i class="fa fa-search"></i><span> 搜索</span></a></span></div><div id="post-info"><div id="post-title">Kubernetes核心技术Pod</div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 2021-02-01</time><span class="post-meta__separator">|</span><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/blog/categories/kubenetes/">kubenetes</a></div></div></div><div class="layout" id="content-inner"><article id="post"><div class="article-container" id="post-content"><h1 id="Kubernetes核心技术Pod"><a href="#Kubernetes核心技术Pod" class="headerlink" title="Kubernetes核心技术Pod"></a>Kubernetes核心技术Pod</h1><h2 id="Pod概述"><a href="#Pod概述" class="headerlink" title="Pod概述"></a>Pod概述</h2><p>Pod是K8S系统中可以创建和管理的最小单元，是资源对象模型中由用户创建或部署的最小资源对象模型，也是在K8S上运行容器化应用的资源对象，其它的资源对象都是用来支撑或者扩展Pod对象功能的，比如控制器对象是用来管控Pod对象的，Service或者Ingress资源对象是用来暴露Pod引用对象的，PersistentVolume资源对象是用来为Pod提供存储等等，K8S不会直接处理容器，而是Pod，Pod是由一个或多个container组成。</p>
+<p>Pod是Kubernetes的最重要概念，每一个Pod都有一个特殊的被称为 “根容器”的Pause容器。Pause容器对应的镜像属于Kubernetes平台的一部分，除了Pause容器，每个Pod还包含一个或多个紧密相关的用户业务容器。</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114185528215.png"></p>
+<h3 id="Pod基本概念"><a href="#Pod基本概念" class="headerlink" title="Pod基本概念"></a>Pod基本概念</h3><ul>
+<li>最小部署的单元</li>
+<li>Pod里面是由一个或多个容器组成【一组容器的集合】</li>
+<li>一个pod中的容器是共享网络命名空间</li>
+<li>Pod是短暂的</li>
+<li>每个Pod包含一个或多个紧密相关的用户业务容器</li>
+</ul>
+<h3 id="Pod存在的意义"><a href="#Pod存在的意义" class="headerlink" title="Pod存在的意义"></a>Pod存在的意义</h3><ul>
+<li>创建容器使用docker，一个docker对应一个容器，一个容器运行一个应用进程</li>
+<li>Pod是多进程设计，运用多个应用程序，也就是一个Pod里面有多个容器，而一个容器里面运行一个应用程序</li>
+</ul>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114190018948.png"></p>
+<ul>
+<li>Pod的存在是为了亲密性应用<ul>
+<li>两个应用之间进行交互</li>
+<li>网络之间的调用【通过127.0.0.1 或 socket】</li>
+<li>两个应用之间需要频繁调用</li>
+</ul>
+</li>
+</ul>
+<p>Pod是在K8S集群中运行部署应用或服务的最小单元，它是可以支持多容器的。Pod的设计理念是支持多个容器在一个Pod中共享网络地址和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务。同时Pod对多容器的支持是K8S中最基础的设计理念。在生产环境中，通常是由不同的团队各自开发构建自己的容器镜像，在部署的时候组合成一个微服务对外提供服务。</p>
+<p>Pod是K8S集群中所有业务类型的基础，可以把Pod看作运行在K8S集群上的小机器人，不同类型的业务就需要不同类型的小机器人去执行。目前K8S的业务主要可以分为以下几种</p>
+<ul>
+<li>长期伺服型：long-running</li>
+<li>批处理型：batch</li>
+<li>节点后台支撑型：node-daemon</li>
+<li>有状态应用型：stateful application</li>
+</ul>
+<p>上述的几种类型，分别对应的小机器人控制器为：Deployment、Job、DaemonSet 和 StatefulSet  (后面将介绍控制器)</p>
+<h2 id="Pod实现机制"><a href="#Pod实现机制" class="headerlink" title="Pod实现机制"></a>Pod实现机制</h2><p>主要有以下两大机制</p>
+<ul>
+<li>共享网络</li>
+<li>共享存储</li>
+</ul>
+<h3 id="共享网络"><a href="#共享网络" class="headerlink" title="共享网络"></a>共享网络</h3><p>容器本身之间相互隔离的，一般是通过 <strong>namespace</strong> 和 <strong>group</strong> 进行隔离，那么Pod里面的容器如何实现通信？</p>
+<ul>
+<li>首先需要满足前提条件，也就是容器都在同一个<strong>namespace</strong>之间</li>
+</ul>
+<p>关于Pod实现原理，首先会在Pod会创建一个根容器： <code>pause容器</code>，然后我们在创建业务容器 【nginx，redis 等】，在我们创建业务容器的时候，会把它添加到 <code>info容器</code> 中</p>
+<p>而在 <code>info容器</code> 中会独立出  ip地址，mac地址，port 等信息，然后实现网络的共享</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114190913859.png"></p>
+<p>完整步骤如下</p>
+<ul>
+<li>通过 Pause 容器，把其它业务容器加入到Pause容器里，让所有业务容器在同一个名称空间中，可以实现网络共享</li>
+</ul>
+<h3 id="共享存储"><a href="#共享存储" class="headerlink" title="共享存储"></a>共享存储</h3><p>Pod持久化数据，专门存储到某个地方中</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114193124160.png"></p>
+<p>使用 Volumn数据卷进行共享存储，案例如下所示</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114193341993.png"></p>
+<h2 id="Pod镜像拉取策略"><a href="#Pod镜像拉取策略" class="headerlink" title="Pod镜像拉取策略"></a>Pod镜像拉取策略</h2><p>我们以具体实例来说，拉取策略就是 <code>imagePullPolicy</code></p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114193605230.png"></p>
+<p>拉取策略主要分为了以下几种</p>
+<ul>
+<li>IfNotPresent：默认值，镜像在宿主机上不存在才拉取</li>
+<li>Always：每次创建Pod都会重新拉取一次镜像</li>
+<li>Never：Pod永远不会主动拉取这个镜像</li>
+</ul>
+<h2 id="Pod资源限制"><a href="#Pod资源限制" class="headerlink" title="Pod资源限制"></a>Pod资源限制</h2><p>也就是我们Pod在进行调度的时候，可以对调度的资源进行限制，例如我们限制 Pod调度是使用的资源是 2C4G，那么在调度对应的node节点时，只会占用对应的资源，对于不满足资源的节点，将不会进行调度</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114194057920.png"></p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>我们在下面的地方进行资源的限制</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114194245517.png"></p>
+<p>这里分了两个部分</p>
+<ul>
+<li>request：表示调度所需的资源</li>
+<li>limits：表示最大所占用的资源</li>
+</ul>
+<h2 id="Pod重启机制"><a href="#Pod重启机制" class="headerlink" title="Pod重启机制"></a>Pod重启机制</h2><p>因为Pod中包含了很多个容器，假设某个容器初选问题了，那么就会触发Pod重启机制</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114194722125.png"></p>
+<p>重启策略主要分为以下三种</p>
+<ul>
+<li>Always：当容器终止退出后，总是重启容器，默认策略 【nginx等，需要不断提供服务】</li>
+<li>OnFailure：当容器异常退出（退出状态码非0）时，才重启容器。</li>
+<li>Never：当容器终止退出，从不重启容器 【批量任务】</li>
+</ul>
+<h2 id="Pod健康检查"><a href="#Pod健康检查" class="headerlink" title="Pod健康检查"></a>Pod健康检查</h2><p>通过容器检查，原来我们使用下面的命令来检查</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod</span><br></pre></td></tr></table></figure>
+
+<p>但是有的时候，程序可能出现了 <strong>Java</strong> 堆内存溢出，程序还在运行，但是不能对外提供服务了，这个时候就不能通过 容器检查来判断服务是否可用了</p>
+<p>这个时候就可以使用应用层面的检查</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 存活检查，如果检查失败，将杀死容器，根据Pod的restartPolicy【重启策略】来操作</span></span><br><span class="line">livenessProbe</span><br><span class="line"></span><br><span class="line"><span class="comment"># 就绪检查，如果检查失败，Kubernetes会把Pod从Service endpoints中剔除</span></span><br><span class="line">readinessProbe</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114195807564.png"></p>
+<p>Probe支持以下三种检查方式</p>
+<ul>
+<li>http Get：发送HTTP请求，返回200 - 400 范围状态码为成功</li>
+<li>exec：执行Shell命令返回状态码是0为成功</li>
+<li>tcpSocket：发起TCP Socket建立成功</li>
+</ul>
+<h2 id="Pod调度策略"><a href="#Pod调度策略" class="headerlink" title="Pod调度策略"></a>Pod调度策略</h2><h3 id="创建Pod流程"><a href="#创建Pod流程" class="headerlink" title="创建Pod流程"></a>创建Pod流程</h3><ul>
+<li>首先创建一个pod，然后创建一个API Server 和 Etcd【把创建出来的信息存储在etcd中】</li>
+<li>然后创建 Scheduler，监控API Server是否有新的Pod，如果有的话，会通过调度算法，把pod调度某个node上</li>
+<li>在node节点，会通过 <code>kubelet -- apiserver </code> 读取etcd 拿到分配在当前node节点上的pod，然后通过docker创建容器</li>
+</ul>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114201611308.png"></p>
+<h3 id="影响Pod调度的属性"><a href="#影响Pod调度的属性" class="headerlink" title="影响Pod调度的属性"></a>影响Pod调度的属性</h3><p>Pod资源限制对Pod的调度会有影响</p>
+<h4 id="根据request找到足够node节点进行调度"><a href="#根据request找到足够node节点进行调度" class="headerlink" title="根据request找到足够node节点进行调度"></a>根据request找到足够node节点进行调度</h4><p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114194245517.png"></p>
+<h4 id="节点选择器标签影响Pod调度"><a href="#节点选择器标签影响Pod调度" class="headerlink" title="节点选择器标签影响Pod调度"></a>节点选择器标签影响Pod调度</h4><p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114202456151.png"></p>
+<p>关于节点选择器，其实就是有两个环境，然后环境之间所用的资源配置不同</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114202643905.png"></p>
+<p>我们可以通过以下命令，给我们的节点新增标签，然后节点选择器就会进行调度了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl label node node1 env_role=prod</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="节点亲和性"><a href="#节点亲和性" class="headerlink" title="节点亲和性"></a>节点亲和性</h4><p>节点亲和性 <strong>nodeAffinity</strong> 和 之前nodeSelector 基本一样的，根据节点上标签约束来决定Pod调度到哪些节点上</p>
+<ul>
+<li>硬亲和性：约束条件必须满足</li>
+<li>软亲和性：尝试满足，不保证</li>
+</ul>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114203433939.png"></p>
+<p>支持常用操作符：in、NotIn、Exists、Gt、Lt、DoesNotExists</p>
+<p>反亲和性：就是和亲和性刚刚相反，如 NotIn、DoesNotExists等</p>
+<h2 id="污点和污点容忍"><a href="#污点和污点容忍" class="headerlink" title="污点和污点容忍"></a>污点和污点容忍</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>nodeSelector 和 NodeAffinity，都是Prod调度到某些节点上，属于Pod的属性，是在调度的时候实现的。</p>
+<p>Taint 污点：节点不做普通分配调度，是节点属性</p>
+<h3 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h3><ul>
+<li>专用节点【限制ip】</li>
+<li>配置特定硬件的节点【固态硬盘】</li>
+<li>基于Taint驱逐【在node1不放，在node2放】</li>
+</ul>
+<h3 id="查看污点情况"><a href="#查看污点情况" class="headerlink" title="查看污点情况"></a>查看污点情况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe node k8smaster | grep Taint</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114204124819.png"></p>
+<p>污点值有三个</p>
+<ul>
+<li>NoSchedule：一定不被调度</li>
+<li>PreferNoSchedule：尽量不被调度【也有被调度的几率】</li>
+<li>NoExecute：不会调度，并且还会驱逐Node已有Pod</li>
+</ul>
+<h3 id="未节点添加污点"><a href="#未节点添加污点" class="headerlink" title="未节点添加污点"></a>未节点添加污点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint node [node] key=value:污点的三个值</span><br></pre></td></tr></table></figure>
+
+<p>举例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint node k8snode1 env_role=<span class="built_in">yes</span>:NoSchedule</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除污点"><a href="#删除污点" class="headerlink" title="删除污点"></a>删除污点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint node k8snode1 env_role:NoSchedule-</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114210022883.png"></p>
+<h3 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h3><p>我们现在创建多个Pod，查看最后分配到Node上的情况</p>
+<p>首先我们创建一个 nginx 的pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create deployment web --image=nginx</span><br></pre></td></tr></table></figure>
+
+<p>然后使用命令查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -o wide</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114204917548.png"></p>
+<p>我们可以非常明显的看到，这个Pod已经被分配到 k8snode1 节点上了</p>
+<p>下面我们把pod复制5份，在查看情况pod情况</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl scale deployment web --replicas=5</span><br></pre></td></tr></table></figure>
+
+<p>我们可以发现，因为master节点存在污点的情况，所以节点都被分配到了 node1 和 node2节点上</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114205135282.png"></p>
+<p>我们可以使用下面命令，把刚刚我们创建的pod都删除</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl delete deployment web</span><br></pre></td></tr></table></figure>
+
+<p>现在给了更好的演示污点的用法，我们现在给 node1节点打上污点</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint node k8snode1 env_role=<span class="built_in">yes</span>:NoSchedule</span><br></pre></td></tr></table></figure>
+
+<p>然后我们查看污点是否成功添加</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe node k8snode1 | grep Taint</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114205516154.png"></p>
+<p>然后我们在创建一个 pod</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建nginx pod</span></span><br><span class="line">kubectl create deployment web --image=nginx</span><br><span class="line"><span class="comment"># 复制五次</span></span><br><span class="line">kubectl scale deployment web --replicas=5</span><br></pre></td></tr></table></figure>
+
+<p>然后我们在进行查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -o wide</span><br></pre></td></tr></table></figure>
+
+<p>我们能够看到现在所有的pod都被分配到了 k8snode2上，因为刚刚我们给node1节点设置了污点</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114205654867.png"></p>
+<p>最后我们可以删除刚刚添加的污点</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl taint node k8snode1 env_role:NoSchedule-</span><br></pre></td></tr></table></figure>
+
+<h3 id="污点容忍"><a href="#污点容忍" class="headerlink" title="污点容忍"></a>污点容忍</h3><p>污点容忍就是某个节点可能被调度，也可能不被调度</p>
+<p><img src="https://gitee.com/xscorpion/ImageStore/raw/master/images/image-20201114210146123.png"></p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Liu Hongzhen</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/7/">https://hongzhenliu.github.io/blog/2021/02/01/kubenetes/7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://hongzhenliu.github.io/blog">Liuhz's Blog</a>！</span></div></div><div class="post-meta__tag-list"><a class="post-meta__tags" href="/blog/tags/k8s/">k8s</a></div><nav id="pagination"><div class="prev-post pull-left"><a href="/blog/2021/02/01/kubenetes/8/"><i class="fa fa-chevron-left">  </i><span>Kubernetes核心技术-Controller</span></a></div><div class="next-post pull-right"><a href="/blog/2021/02/01/kubenetes/6/"><span>Kubernetes集群YAML文件详解</span><i class="fa fa-chevron-right"></i></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2022 By Liu Hongzhen</div><div class="framework-info"><span>驱动 - </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 - </span><a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/hexo-theme-melody"><span>Melody</span></a></div><div class="busuanzi"><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><span id="busuanzi_container_page_pv"><i class="fa fa-file"></i><span id="busuanzi_value_page_pv"></span><span></span></span></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><script src="https://cdn.jsdelivr.net/npm/animejs@latest/lib/anime.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@latest/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-ui-pack@latest/velocity.ui.min.js"></script><script src="/blog/js/utils.js?version=1.9.1"></script><script src="/blog/js/fancybox.js?version=1.9.1"></script><script src="/blog/js/sidebar.js?version=1.9.1"></script><script src="/blog/js/copy.js?version=1.9.1"></script><script src="/blog/js/fireworks.js?version=1.9.1"></script><script src="/blog/js/transition.js?version=1.9.1"></script><script src="/blog/js/scroll.js?version=1.9.1"></script><script src="/blog/js/head.js?version=1.9.1"></script><script src="/blog/js/search/local-search.js"></script><script>if(/Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(navigator.userAgent)) {
+  $('#nav').addClass('is-mobile')
+  $('footer').addClass('is-mobile')
+  $('#top-container').addClass('is-mobile')
+}</script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>
